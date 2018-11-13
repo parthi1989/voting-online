@@ -2,7 +2,11 @@ const express = require('express');
 const hbs = require('hbs');
 const fs = require('fs')
 
-const port = process.env.PORT || 3000;  
+
+
+
+
+const port = process.env.PORT || 3001;  
 var app = express();
 hbs.registerPartials(__dirname+'/views/Partials');
 hbs.registerHelper('getCurrentYear',() => new  Date().getFullYear());
@@ -21,7 +25,11 @@ app.get('/vote',(req,res) =>{
     res.render('home.hbs',{PageTitle:"Home Page",BodyContent:"Welcome to Website" ,ABC:"ABC"});
 })
 
+module.exports.app = app;
+
 app.listen(port,()=>console.log("Server is up and running in port " + port ));
+
+
 
 // var message=encodeURIComponent("message with OTP : 123456");
 //"https://smsapi.engineeringtgr.com/send/?Mobile=9962980733&Password=sendsms&Message="+message+"&To=9962980733&Key=parthV04X9KEUuyptWmleYLw"
