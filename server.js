@@ -1,13 +1,17 @@
 const express = require('express');
+var bodyParser = require('body-parser');
 const hbs = require('hbs');
-const fs = require('fs')
+const fs = require('fs');
+const utils = require('./utils');
+var {mongoose} = require('./db/db');
+var {User} = require('./db/models/user');
+var {Vote} = require('./db/models/vote');
 
 
-
-
-
-const port = process.env.PORT || 3001;  
+const port = process.env.PORT || 3000;  
 var app = express();
+app.use(bodyParser.json());
+
 hbs.registerPartials(__dirname+'/views/Partials');
 hbs.registerHelper('getCurrentYear',() => new  Date().getFullYear());
 hbs.registerHelper('screamIT',(text,text2) => text.toUpperCase()+" "+text2.toLowerCase()); 
@@ -18,12 +22,65 @@ app.use((req,res,next)=>{
     var log = `${now}: ${req.method} ${req.url}`;
     fs.appendFile('server.log', log + "\n",(err)=>{ if(err){console.log('unable to append');}});
     next();
-})
-app.get('/vote',(req,res) =>{
+});
+app.get('/fetchvotes',(req,res) =>{
     //res.send(JSON.stringify(req));
     //res.send("Voted successfully");
-    res.render('home.hbs',{PageTitle:"Home Page",BodyContent:"Welcome to Website" ,ABC:"ABC"});
+    //res.render('home.hbs',{PageTitle:"Home Page",BodyContent:"Welcome to Website" ,ABC:"ABC"});
+    Vote.find().then((votes) => {
+        res.send({votes});
+      }, (e) => {
+        res.status(400).send(e);
+      });
+    
+   /*var vote = new Vote({
+    IdentityId: "ADH007",
+    PartyId: "PAR003",
+    location: 600020,
+    center:"ADR002"
+  });
+
+  vote.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.status(400).send(e);
+  });
+  */
+});
+
+app.get('/fetchusers',(req,res) =>{
+    User.find().then((users) => {
+        res.send({users});
+      }, (e) => {
+        res.status(400).send(e);
+      });
+});
+
+app.post('/vote',(req,res) => {
+    var vote = new Vote(req.body);
+    vote.save().then((votes)=>{
+        //console.log("received success"+vote);
+        res.send(votes);
+    }, (e) => {
+        //console.log("received failure"+e);
+        res.status(400).send(e);
+    }).catch((e)=> res.status(400).send(e));
+});
+
+
+/*
+app.get('/SaveUser',(req,res) =>{
+    //res.send(JSON.stringify(req));
+    //res.send("Voted successfully");
+    //console.log(JSON.stringify(req,undef,2));
+    
+    var obj = utils.AddUser(req);
+    console.log(obj);
+    res.render(obj);
 })
+*/
+
+
 
 module.exports.app = app;
 

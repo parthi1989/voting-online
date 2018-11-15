@@ -8,13 +8,14 @@ var spyapp  = rewire('./utils');
         saveUser : expect.createSpy()
      };
      spyapp.__set__('db',db);
-        
-    it('Testing with spies',() => {
+    
+    it('Testing with spies',(done) => {
 
         
 
         spyapp.AddUser({name:"parthi",mobile:9962980733});
         
         expect(db.saveUser).toHaveBeenCalledWith({name:"parthi",mobile:9962980733,country:"India"});
+        done();
+        //console.log("Ending test");
     });
-
