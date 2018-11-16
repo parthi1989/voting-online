@@ -18,6 +18,10 @@ var User = mongoose.model('USER', {
   location: {
     type:String,
     required:true
+  },
+  updatedAt : {
+    type: Number,
+    default : null
   }
 });
 

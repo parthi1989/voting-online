@@ -1,11 +1,16 @@
+require('./config/config')
+
 const express = require('express');
 var bodyParser = require('body-parser');
 const hbs = require('hbs');
 const fs = require('fs');
+const {ObjectID} = require('mongodb');
 const utils = require('./utils');
 var {mongoose} = require('./db/db');
 var {User} = require('./db/models/user');
 var {Vote} = require('./db/models/vote');
+const _ = require('lodash');
+
 
 
 const port = process.env.PORT || 3000;  
@@ -23,6 +28,11 @@ app.use((req,res,next)=>{
     fs.appendFile('server.log', log + "\n",(err)=>{ if(err){console.log('unable to append');}});
     next();
 });
+
+
+
+
+
 app.get('/fetchvotes',(req,res) =>{
     //res.send(JSON.stringify(req));
     //res.send("Voted successfully");
@@ -56,8 +66,23 @@ app.get('/fetchusers',(req,res) =>{
       });
 });
 
+app.get('/fetchuser/:IdentityId',(req,res) =>{
+    var IdentityId = req.params.IdentityId;
+
+
+    
+    User.find({IdentityId}).then((users) => {
+        //console.log("fetched User: " + users);
+        res.send({users});
+      }, (e) => {
+        res.status(400).send(e);
+      });
+});
+
+
 app.post('/vote',(req,res) => {
     var vote = new Vote(req.body);
+    //console.log("body : " + JSON.stringify(req.body,undefined,2));
     vote.save().then((votes)=>{
         //console.log("received success"+vote);
         res.send(votes);
@@ -67,9 +92,63 @@ app.post('/vote',(req,res) => {
     }).catch((e)=> res.status(400).send(e));
 });
 
+app.post('/SaveUser',(req,res) => {
+    var user = new User(req.body);
+    user.save().then((user)=>{
+        //console.log("received success"+vote);
+        res.send(user);
+    }, (e) => {
+        //console.log("received failure"+e);
+        res.status(400).send(e);
+    }).catch((e)=> res.status(400).send(e));
+});
+
+app.delete('/vote/:id',(req,res) =>{
+    
+    if(!ObjectID.isValid(req.params.id)) {
+        res.status(404).send();
+    }
+    //console.log("delete id : " +    req.params.id);
+    Vote.findByIdAndDelete(req.params.id).then((vote) => {
+        //console.log("delete vote: " + users);
+        if(!vote){
+            res.status(404).send();
+        }
+        res.status(200).send({vote});
+      }, (e) => {
+        res.status(400).send(e);
+      });
+});
+
+
+
+app.patch('/user/:id', (req, res) => {
+    var id = req.params.id;
+    //console.log("params"+req.params);
+    var body = _.pick(req.body, ['name', 'IdentityId','age','location']);
+    //console.log("body" + body);
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send();
+    }
+    
+    body.updatedAt = new Date().getTime();
+    
+    
+    User.findByIdAndUpdate(id, {$set: body}, {new: true}).then((user) => {
+      if (!user) {
+        return res.status(404).send();
+      }
+      //console.log("Updated user" + user);
+      res.send({user});
+    }).catch((e) => {
+      res.status(400).send();
+    })
+  });
+
+
 
 /*
-app.get('/SaveUser',(req,res) =>{
+  app.get('/SaveUser',(req,res) =>{
     //res.send(JSON.stringify(req));
     //res.send("Voted successfully");
     //console.log(JSON.stringify(req,undef,2));
@@ -77,14 +156,13 @@ app.get('/SaveUser',(req,res) =>{
     var obj = utils.AddUser(req);
     console.log(obj);
     res.render(obj);
-})
+});
 */
-
 
 
 module.exports.app = app;
 
-app.listen(port,()=>console.log("Server is up and running in port " + port ));
+app.listen(process.env.PORT,()=>console.log("Server is up and running in port " + process.env.PORT ));
 
 
 

@@ -13,9 +13,9 @@ var spyapp  = rewire('./utils');
 
         
 
-        spyapp.AddUser({name:"parthi",mobile:9962980733});
+        spyapp.AddUser({name:"parthi",mobile:9962980733,IdentityId:"ADHR020"});
         
-        expect(db.saveUser).toHaveBeenCalledWith({name:"parthi",mobile:9962980733,country:"India"});
+        expect(db.saveUser).toHaveBeenCalledWith({name:"parthi",mobile:9962980733,IdentityId:"ADHR020",country:"India"});
         done();
         //console.log("Ending test");
     });

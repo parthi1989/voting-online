@@ -25,8 +25,9 @@ module.exports.saveUser = (user) => {
 
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
-console.log(mongoose.Promise);
-mongoose.connect('mongodb://localhost:27017/Vote',{useNewUrlParser:true});
+console.log(process.env.MONGODB_URL || 'mongodb://localhost:27017/Vote');
+
+mongoose.connect(process.env.MONGODB_URL,{useNewUrlParser:true});
 //mongoose.connect('mongodb://localhost:27017/TodoApp');
 
 
