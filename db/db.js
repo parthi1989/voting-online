@@ -8,9 +8,9 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', (err, db) => {
 
   
 });
-
+*/
 module.exports.saveUser = (user) => {
-    console.log('saving user ' + user.name +" with mobile number :" + user.mobile);
+    console.log('saving user ' + JSON.stringify(user,undefined,2));
     db.collection('USERS').insertOne(user, (err, result) => {
         if (err) {
           return console.log('Unable to insert user', err);
@@ -21,7 +21,7 @@ module.exports.saveUser = (user) => {
     
       db.close();
 }
-*/
+
 
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;

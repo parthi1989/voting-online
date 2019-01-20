@@ -11,24 +11,34 @@ const vote = {
     _id : new ObjectID(), 
     "IdentityId" : "TEST999",
 	"PartyId"	: "TEST999",
-	"location"	: 000999 ,
+	"location"	: 000999,
 	"center"	: "PLC999"
 };
 
 const user = {
-    _id : new ObjectID(),
+    _id : new ObjectID(), 
     "name" : "XXXXXX",
     "age" : 99,
-    "location" : 000999,
-    "IdentityId" : "TEST998"
+    "location" : "000999",
+    "IdentityId" : "TEST998",
+    "mobile": 1000000000,
+    "email": "abc@gmail.com",
+    "password": "aaaaaaaaaaaaaaaaaaaaaaaa"
 }
 
 beforeEach((done) => {
     Vote.remove({}).then(() => {
       return Vote.insertMany(vote);
-      done()
-    }).then(() => done());
-  });
+    }).then(() => {
+        User.remove({}).then(() => {
+            return User.insertMany(user);
+        }).then(()=> 1)
+    }).then (()=>done());
+
+    
+
+
+});
 
 describe('Checking app',() => {
 
@@ -69,7 +79,7 @@ it ('Should get help page',(done)=>{
 
 it ('create votes', (done) => {
     var tempvote = {
-        "IdentityId": "TEST998",
+        "IdentityId": "TEST996",
         "PartyId"	: "TEST998",
         "location"	: 000998,
         "center"	: "PLC998"
@@ -87,7 +97,7 @@ it ('create votes', (done) => {
         //console.log("\nInside success"+ res.body.IdentityId);
         expect(res.body.IdentityId).toBe(tempvote.IdentityId);
         Vote.find(tempvote).then((votes)=>{
-            console.log(votes.length);
+            //console.log(votes.length);
             expect(votes.length).toBeGreaterThanOrEqualTo(1);
         });
 
@@ -119,21 +129,101 @@ it ('create votes', (done) => {
 //console.log("\nEnding the tests");    
 }
 );
-
+var tempsavedid;
 it ('create user', (done) => {
-
+    var tempuser = {
+        _id : new ObjectID(), 
+        "name" : "XXXXXX",
+        "age" : 99,
+        "location" : "000999",
+        "IdentityId" : "TEST995",
+        "mobile": 1000000002,
+        "email": "abe@gmail.com",
+        "password": "aaaaaaaaaaaaaaaaaaaaaaaa"
+        
+    };
+    tempsavedid = tempuser._id;
+    //console.log(tempuser._id);
+    //console.log("create user");console.log(user);
+    //console.log("copied user");console.log(tempuser);
     request(app).post('/SaveUser')
-    .send(user)
+    .send(tempuser)
     .expect(200)
     .then((res) =>{
-        expect(res.body._id).toBe(user._id.toHexString());
+        //console.log("\nInside success");
+        //console.log(res.body);
+        
+        //expect(res.body._id).toBe(tempuser._id.toHexString());
         done();
     },(e)=>{
         //console.log("\nInside failiure");
         done(e);
     });
-}
-);
+});
+
+it('should get token after checking the authenticity',(done)=>{
+    var finaltoken;
+    var tempuser = {
+        _id : new ObjectID(), 
+        "name" : "XXXXXX",
+        "age" : 99,
+        "location" : "000999",
+        "IdentityId" : "TEST995",
+        "mobile": 1000000002,
+        "email": "abe@gmail.com",
+        "password": "aaaaaaaaaaaaaaaaaaaaaaaa"
+        
+    };
+    tempsavedid = tempuser._id;
+    //console.log(tempuser._id);
+    //console.log("create user");console.log(user);
+    //console.log("copied user");console.log(tempuser);
+    request(app).post('/SaveUser')
+    .send(tempuser)
+    .expect(200)
+    .then((res) =>{
+        //console.log("\nInside success");
+        //console.log(res.body);
+        
+        
+        //expect(res.body._id).toBe(tempuser._id.toHexString());
+        
+    },(ec)=>{
+        //console.log("\nInside failiure");
+        done(ec);
+    }).then(()=>{
+
+    request(app)
+    .get('/users/login/')
+    .send({"email" : tempuser.email,"password":tempuser.password})
+    .expect(200)
+    .expect((res) => {
+       // console.log(" received " + res.headers['x-auth']);
+      expect(res.headers['x-auth']).toExist();
+      
+    })
+    
+    
+    
+    .then((res)=>{
+
+        //console.log("\n\ntempsavedid"+tempsavedid + "\n" + finaltoken);
+        User.findById(tempsavedid).then((user)=>{
+//console.log("resheaders");           
+//console.log(res.headers['x-auth']);
+            expect(user.tokens[0]).toInclude({
+                access : 'auth',
+                token : res.headers['x-auth']
+            });
+           
+        }).catch((eb)=>{done(eb)});
+        done();
+    }).catch((e)=> done(e));
+    
+
+});
+});
+
 
 
 describe('GET /fetchvotes', () => {
@@ -193,7 +283,7 @@ describe('GET /fetchvotes', () => {
         .send({"location":"xxxxxx"})
         .expect(200)
         .then((res) => {
-          //console.log(res);
+          //console.log("res" + JSON.stringify(res,undefined,2));
           expect(res.body.user.location).toBe(location);
           expect(res.body.user.updatedAt).toBeA('number');
           done();
@@ -202,4 +292,31 @@ describe('GET /fetchvotes', () => {
     });
 });
 
+
+/*
+
+describe('POST /SaveUser', () => {
+    it('should update the user and create token', (done) => {
+      var hexId = user._id.toHexString();
+      var location = 'xxxxxx';
+        //console.log(`/user/${hexId}`);console.log({location});
+        request(app)
+        .post('/SaveUser')
+        .send({"location":"xxxxxx"})
+        .expect(200)
+        .then((res) => {
+          //console.log("res" + JSON.stringify(res,undefined,2));
+          expect(res.body.user.location).toBe(location);
+          expect(res.body.user.updatedAt).toBeA('number');
+          done();
+        },(e)=> done(e));
+        
+    });
+});
+*/
+/*
+describe('GET Protected Login ',() =>{
+    
+})
+*/
   

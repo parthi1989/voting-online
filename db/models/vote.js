@@ -5,7 +5,8 @@ var Vote = mongoose.model('Vote', {//it converts name to lowercase and adds s at
     type: String,
     required: true,
     trim: true,
-    minlength: 5
+    minlength: 5,
+    unique: true
   },
   PartyId: {
     type: String,

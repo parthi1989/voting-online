@@ -9,6 +9,8 @@ const utils = require('./utils');
 var {mongoose} = require('./db/db');
 var {User} = require('./db/models/user');
 var {Vote} = require('./db/models/vote');
+var {authenticate} = require('./middleware/authenticate');
+
 const _ = require('lodash');
 
 
@@ -60,6 +62,9 @@ app.get('/fetchvotes',(req,res) =>{
 
 app.get('/fetchusers',(req,res) =>{
     User.find().then((users) => {
+        if(!users){
+            res.status(404).send();null
+        }
         res.send({users});
       }, (e) => {
         res.status(400).send(e);
@@ -93,14 +98,41 @@ app.post('/vote',(req,res) => {
 });
 
 app.post('/SaveUser',(req,res) => {
-    var user = new User(req.body);
-    user.save().then((user)=>{
-        //console.log("received success"+vote);
-        res.send(user);
-    }, (e) => {
+/*
+    console.log("Save user ");
+    User.find().then((users) => {
+        if(!users){
+            console.log("404");
+        }
+        console.log("existing users");
+        console.log(users);
+      }, (e) => {
+        console.log("404");
+      });
+    console.log(_.pick(req.body,['name','age','location','IdentityId','mobile','email','password','_id']));
+*/    
+    var ruser = _.pick(req.body,['name','age','location','IdentityId','mobile','email','password','_id']);
+    //console.log("saveuser");
+    //console.log(ruser);
+    var ruser = new User(ruser);
+    //console.log("compiled user ");
+    //console.log(ruser);
+    ruser.save().then((user)=>{
+        //console.log("received success"+user);
+        //res.send(user);
+        return ruser.generateAuthToken();
+        }, (e) => {
         //console.log("received failure"+e);
         res.status(400).send(e);
-    }).catch((e)=> res.status(400).send(e));
+        }
+    ).then((token)=>{
+        //console.log('setting token');
+        res.header('x-auth',token).send(ruser);
+    }).catch((e)=> {
+        //console.log("received error"+e);
+        //console.log(e);
+        res.status(400).send(e)
+    });
 });
 
 app.delete('/vote/:id',(req,res) =>{
@@ -145,6 +177,14 @@ app.patch('/user/:id', (req, res) => {
     })
   });
 
+app.delete('/users/me/token',authenticate, (req, res) => {
+  req.user.removetoken(req.token).then(()=>{
+    res.status(200).send();
+  },()=>{
+    res.status(400).send();
+  });
+});
+
 
 
 /*
@@ -159,6 +199,44 @@ app.patch('/user/:id', (req, res) => {
 });
 */
 
+
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user);
+  });
+
+app.get('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  
+  
+
+
+// console.log(body);
+  User.find(body).then((fuser)=>{
+    // console.log("fetched user"+  fuser);
+    if(!fuser)
+    {return res.status(404).send("User not available");}
+    //fuser.toObject();
+    
+    
+    
+    //console.log("specific");
+    var userobject= Object.values(fuser);
+    //console.log(userobject[0].tokens[0].token);
+    //var ruser = new User(ruser);
+    return userobject[0].tokens[0].token;
+  }).then((token)=>{
+    //console.log("tokens" + token);
+    res.header('x-auth',token);
+    res.status(200).send();
+  }).catch((e)=> {
+    //console.log("received error"+e);
+    //console.log(e);
+    res.status(404).send(e);
+});
+
+});
+  
+  
 
 module.exports.app = app;
 
