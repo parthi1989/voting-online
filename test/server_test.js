@@ -3,9 +3,9 @@ const expect = require('expect');
 const {ObjectID} = require('mongodb');
 
 
-var app = require('./server').app;
-const {Vote} = require('./db/models/vote');
-const {User} = require('./db/models/user');
+var app = require('../server').app;
+const {Vote} = require('../db/models/vote');
+const {User} = require('../db/models/user');
 
 const vote = {
     _id : new ObjectID(), 

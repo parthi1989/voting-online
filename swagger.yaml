@@ -1,0 +1,412 @@
+swagger: "2.0"
+
+info:
+  version: 1.0.0
+  title: Online Voting
+  description: A simple API to have multiple users and to cast their vote online
+
+schemes:
+  - https
+host: localhost:3000
+basePath: /
+
+paths:
+  /fetchvotes:
+    get:
+      summary: Gets all the votes casted so far
+      description: Returns a list of all the votes casted.
+      responses:
+        200:
+          description: Fetches list of votes
+          schema:
+            type: array
+            items:
+              properties:
+                IdentityId:
+                  type: string
+                PartyId:
+                  type: string
+                location:
+                  type: string
+                center:
+                  type: string
+        404:
+          description: Request failed . Unable to fetch votes
+  /fetchusers:
+    get:
+      summary: Fetch all the users registered 
+      description: Fetch all the users registered using this API SaveUSer URL.
+      responses:
+        200:
+          description: details about the users.
+          schema:
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                location:
+                  type: string
+                age:
+                  type: number
+                IdentityId:
+                  type: string
+                mobile:
+                  type: number
+                tokens:
+                  type: array
+                  items:
+                    properties:
+                      _id:
+                        type: string
+                      access:
+                        type: string
+                      token:
+                        type: string
+        404:
+          description: Users not found.
+        400:
+          description: Bad request
+  /fetchuser/{Id}:
+    get:
+      summary: Fetch all the users registered 
+      description: Fetch all the users registered using this API SaveUSer URL.
+      parameters:
+        - name: ID
+          in: path
+          required: true
+          description: The User's ID
+          type: string
+      responses:
+        200:
+          description: details about the users.
+          schema:
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                location:
+                  type: string
+                age:
+                  type: number
+                IdentityId:
+                  type: string
+                mobile:
+                  type: number
+                tokens:
+                  type: array
+                  items:
+                    properties:
+                      _id:
+                        type: string
+                      access:
+                        type: string
+                      token:
+                        type: string
+        404:
+          description: Users not found.
+        400:
+          description: Bad request
+  /users/me:
+    get:
+      summary: Get current users details 
+      description: Fetch all the users registered using this API SaveUSer URL.
+      parameters:
+        - name: x-auth
+          in: header
+          required: true
+          description: The User's authenticated token
+          format: uuid
+          type: string
+      responses:
+        200:
+          description: details about the users.
+          schema:
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                location:
+                  type: string
+                age:
+                  type: number
+                IdentityId:
+                  type: string
+                mobile:
+                  type: number
+                tokens:
+                  type: array
+                  items:
+                    properties:
+                      _id:
+                        type: string
+                      access:
+                        type: string
+                      token:
+                        type: string
+        400:
+          description: Bad request
+  /users/login:
+    get:
+      summary: Login user and fetch authentication token 
+      description: Login user and fetch authentication token 
+      parameters:
+        - name: email
+          in: path
+          required: true
+          description: The User's registered emailid
+          type: string
+        - name: password
+          in: path
+          required: true
+          description: The user's registered password
+          type: string
+      responses:
+        200:
+          description: authenticated token for the users.
+          headers:
+            x-auth: 
+              schema:
+                type: string
+        400:
+          description: Bad request
+  /fetchuser/{Id}:
+    get:
+      summary: Fetch all the users registered 
+      description: Fetch all the users registered using this API SaveUSer URL.
+      parameters:
+        - name: ID
+          in: path
+          required: true
+          description: The User's ID
+          type: string
+      responses:
+        200:
+          description: details about the users.
+          schema:
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                location:
+                  type: string
+                age:
+                  type: number
+                IdentityId:
+                  type: string
+                mobile:
+                  type: number
+                tokens:
+                  type: array
+                  items:
+                    properties:
+                      _id:
+                        type: string
+                      access:
+                        type: string
+                      token:
+                        type: string
+        404:
+          description: Users not found.
+        400:
+          description: Bad request
+  /vote:
+    post:
+      summary: cast a vote
+      description: cast a vote for the party registered using identities provided
+      parameters:
+        - name: IdentityID
+          in: post
+          required: true
+          description: User's Identity ID
+          type: string
+        - name: PartyId
+          in: post
+          required: true
+          description: voting to which Party
+          type: string
+        - name: location 
+          in: post
+          required: true
+          description: Location  for which the user belongs to
+          type: string
+        - name: center
+          in: post
+          required: true
+          description: center ID the user belongs to
+          type: string
+      responses:
+        200:
+          description: casted vote details
+          schema:
+            type: array
+            items:
+              properties:
+                _id:
+                  type: string
+                IdentityId:
+                  type: string
+                PartyId:
+                  type: string
+                location:
+                  type: string
+                center:
+                  type: number
+  /SaveUser:
+    post:
+      summary: Creates a User
+      description: Creates a user with all their details along with authenticity tokens
+      parameters:
+        - name: name
+          in: post
+          required: true
+          description: User's name
+          type: string
+        - name: age
+          in: post
+          required: true
+          description: age
+          type: number
+        - name: location 
+          in: post
+          required: true
+          description: Location  for which the user belongs to
+          type: string
+        - name: IdentityId
+          in: post
+          required: true
+          description: IdentityId of the User
+          type: string
+        - name: mobile
+          in: post
+          required: true
+          description: mobile number of the User
+          type: number
+        - name: email
+          in: post
+          required: true
+          description: emailId of the User
+          type: string
+        - name: password
+          in: post
+          required: true
+          description: password for the User
+          type: string
+      responses:
+        200:
+          description: Saved user details
+          schema:
+            type: array
+            items:
+              properties:
+                _id:
+                  type: string
+                name:
+                  type: string
+                IdentityId:
+                  type: string
+                email:
+                  type: string
+                location:
+                  type: string
+                mobile:
+                  type: number
+                tokens:
+                  type: array
+                  items:
+                    properties:
+                      _id:
+                        type: string
+                      access:
+                        type: string
+                      token:
+                        type: string
+        400:
+          description: Bad request
+  /vote/{Id}:
+    delete:
+      summary: delete specific vote 
+      description: delete specific vote which matches unique _id.
+      parameters:
+        - name: ID
+          in: path
+          required: true
+          description: The vote's unique id
+          type: string
+      responses:
+        200:
+          description: details about the deleted vote.
+          schema:
+            type: array
+            items:
+              properties:
+                IdentityId:
+                  type: string
+                PartyId:
+                  type: string
+                location:
+                  type: string
+                center:
+                  type: string
+          description: Users not found.
+        400:
+          description: Bad request
+        404:
+          description: vote not found
+  /users/me/token:
+    delete:
+      summary: delete logged in user's authenticated token 
+      description: delete logged in user's authenticated token 
+      parameters:
+        - name: x-auth
+          in: header
+          required: true
+          description: The User's authenticated token
+          format: uuid
+          type: string
+      responses:
+        200:
+          description: deletes current user's.
+        400:
+          description: Bad request
+  /user/{id}:
+    patch:
+      summary: Updates user information 
+      description: Updates user information
+      parameters:
+        - name: name
+          in: post
+          required: true
+          description: User's name
+          type: string
+        - name: age
+          in: post
+          required: true
+          description: age
+          type: number
+        - name: location 
+          in: post
+          required: true
+          description: Location  for which the user belongs to
+          type: string
+        - name: IdentityId
+          in: post
+          required: true
+          description: IdentityId of the User
+          type: string
+      responses:
+        200:
+          description: deletes current user's.
+        400:
+          description: Bad request

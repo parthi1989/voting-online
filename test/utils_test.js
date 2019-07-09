@@ -3,7 +3,7 @@ const expect = require('expect');
 const rewire = require('rewire');
 
 
-var spyapp  = rewire('./utils');
+var spyapp  = rewire('../utils');
     var db = {
         saveUser : expect.createSpy()
      };
