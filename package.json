@@ -26,7 +26,7 @@
     "nyc": "^13.1.0",
     "rewire": "^2.5.2",
     "swagger-ui-express": "^4.0.2",
-    "validator": "^10.9.0",
+    "validator": "^13.7.0",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
